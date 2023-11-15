@@ -1,4 +1,5 @@
 import requests
+import csv
 from bs4 import BeautifulSoup
 
 url = "https://books.toscrape.com/catalogue/a-light-in-the-attic_1000/index.html"
@@ -35,3 +36,14 @@ print(f"Description: {product_description}")
 print(f"Category: {category}")
 print(f"Number of Reviews: {rating}")
 print(f"Image URL: {image_url_td}")
+
+headers = ["url", "UPC", "title", "price_incl_tax", "price_excl_tax",
+           "quantity_available", "product_description", "category", "rating", "image_url_td"]
+
+with open("data.csv", "w", newline="") as csvfile:
+    writer = csv.writer(csvfile, delimiter=",")
+    writer.writerow(headers)
+    for i in range(len(url)):
+        row = [url[i], upc[i], title[i], price_incl_tax[i], price_excl_tax[i],
+           quantity_available[i], product_description[i], category[i], rating[i], image_url_td[i]]
+        writer.writerow(row)
