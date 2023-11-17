@@ -1,11 +1,26 @@
 import requests
 import csv
+import os
 from bs4 import BeautifulSoup
-
 
 # Initialize Arrays to load data into
 (urls, upcs, titles, price_incl_taxs, price_excl_taxs, quantity_availables, product_descriptions,
  categories, ratings, image_urls) = ([], [], [], [], [], [], [], [], [], [])
+
+# Function to download and save the image file for the book
+def download_image(image_url, upc, folder='book_images'):
+    # Create a folder for book images if it doesn't exist
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    # Use the UPC to create a valid filename
+    filename = f"{upc}.jpg"
+    # Combine the folder name and the filename for local path
+    file_path = os.path.join(folder, filename)
+    # Download and save the image
+    response = requests.get(image_url)
+    with open(file_path, 'wb') as file:
+        file.write(response.content)
+    return file_path
 
 # Function to get data from URL to scrape and append to lists
 def scrape_book_data(book_url):
@@ -22,7 +37,8 @@ def scrape_book_data(book_url):
         if book_page_soup.find('div', id='product_description') else 'No description'
     category_td = book_page_soup.find("th", string="Product Type").find_next_sibling("td").string
     rating_td = book_page_soup.find("th", string="Number of reviews").find_next_sibling("td").string
-    image_url_td = book_page_soup.find("img")["src"]
+    image_relative_url = book_page_soup.find("img")["src"]
+    image_url_td = "https://books.toscrape.com" + image_relative_url.replace("../..", "")
 
     # Append data to lists
     urls.append(book_url)
@@ -34,7 +50,9 @@ def scrape_book_data(book_url):
     product_descriptions.append(product_description_td)
     categories.append(category_td)
     ratings.append(rating_td)
-    image_urls.append(image_url_td)
+    # Download and save the image, and append the local path to the list
+    local_image_path = download_image(image_url_td, upc_td)
+    image_urls.append(local_image_path)
 
 # Function to scrape books from a category page
 def scrape_category(category_url):
@@ -61,7 +79,7 @@ category_links = main_soup.select(".side_categories ul li ul li a")
 
 # Scrape all categories
 for link in category_links:
-    category_url = f"https://books.toscrape.com/{link.get("href")}"
+    category_url = f"https://books.toscrape.com/{link.get('href')}"
     scrape_category(category_url)
 
 # CSV headers
