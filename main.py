@@ -38,12 +38,20 @@ def scrape_book_data(book_url):
 
 # Function to scrape books from a category page
 def scrape_category(category_url):
-    response = requests.get(category_url)
-    category_soup = BeautifulSoup(response.content, features="html.parser")
-    books = category_soup.select("h3 > a")
-    for book in books:
-        book_url = book.get("href").replace("../../../", "https://books.toscrape.com/catalogue/")
-        scrape_book_data(book_url)
+    while True:
+        response = requests.get(category_url)
+        category_soup = BeautifulSoup(response.content, features="html.parser")
+        books = category_soup.select("h3 > a")
+        for book in books:
+            book_url = book.get("href").replace("../../../", "https://books.toscrape.com/catalogue/")
+            scrape_book_data(book_url)
+        # Check for additional pages
+        next_button = category_soup.select_one("li.next > a")
+        if next_button:
+            next_page = next_button.get("href")
+            category_url = '/'.join(category_url.split('/')[:-1]) + '/' + next_page
+        else:
+          break
 
 # Scrape categories from main page
 main_url = "https://books.toscrape.com/index.html"
@@ -57,8 +65,8 @@ for link in category_links:
     scrape_category(category_url)
 
 # CSV headers
-headers = ["URL", "UPC", "Title", "Price_incl_tax", "Price_excl_tax",
-           "Quantity_available", "Product_description", "Category", "Rating", "Image_url"]
+headers = ["URL", "UPC", "Title", "Price_Incl_Tax", "Price_Excl_Tax",
+           "Quantity_Available", "Product_Description", "Category", "Rating", "Image_URL"]
 
 # Write to CSV
 with open("books_data.csv", "w", newline="", encoding="utf-8") as csvfile:
