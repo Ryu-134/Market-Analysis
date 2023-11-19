@@ -35,7 +35,8 @@ def scrape_book_data(book_url):
     quantity_available_td = book_page_soup.find("th", string="Availability").find_next_sibling("td").string
     product_description_td = book_page_soup.find("div", id="product_description").find_next_sibling("p").string \
         if book_page_soup.find('div', id='product_description') else 'No description'
-    category_td = book_page_soup.find("th", string="Product Type").find_next_sibling("td").string
+    category_elements = book_page_soup.find_all('a')
+    category_td = [elem.get_text().strip() for elem in category_elements if 'category/books/' in elem.get('href')][-1]
     rating_td = book_page_soup.find("th", string="Number of reviews").find_next_sibling("td").string
     image_relative_url = book_page_soup.find("img")["src"]
     image_url_td = "https://books.toscrape.com" + image_relative_url.replace("../..", "")
