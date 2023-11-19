@@ -50,9 +50,9 @@ def scrape_book_data(book_url):
     product_descriptions.append(product_description_td)
     categories.append(category_td)
     ratings.append(rating_td)
-    # Download and save the image, and append the local path to the list
-    local_image_path = download_image(image_url_td, upc_td)
-    image_urls.append(local_image_path)
+    # Download and save the image
+    image_urls.append(image_url_td)
+    download_image(image_url_td, upc_td)
 
 # Function to scrape books from a category page
 def scrape_category(category_url):
