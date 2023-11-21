@@ -37,7 +37,7 @@ def scrape_book_data(book_url):
         if book_page_soup.find('div', id='product_description') else 'No description'
     category_elements = book_page_soup.find_all('a')
     category_td = [elem.get_text().strip() for elem in category_elements if 'category/books/' in elem.get('href')][-1]
-    rating_td = book_page_soup.find("th", string="Number of reviews").find_next_sibling("td").string
+    rating_td = book_page_soup.find("p", class_="star-rating").get("class")[-1]
     image_relative_url = book_page_soup.find("img")["src"]
     image_url_td = "https://books.toscrape.com" + image_relative_url.replace("../..", "")
 
